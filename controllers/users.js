@@ -74,11 +74,11 @@ module.exports.updateUserInformation = async (req, res) => {
     const updatedUserInfo = await User.findByIdAndUpdate(
       req.user._id,
       { name, about },
-      { new: true, runValisators: true }
+      { new: true, runValidators: true }
     );
     return res.status(HTTP_STATUS_OK).send(updatedUserInfo);
   } catch (error) {
-    if (error.name === "CastError") {
+    if (error.name === "CastError" || error.name === "ValidationError") {
       return res
         .status(HTTP_STATUS_BAD_REQUEST)
         .send({ message: "Переданы невалидные данные" });
@@ -96,11 +96,11 @@ module.exports.updateUserAvatar = async (req, res) => {
     const updatedUserAvatar = await User.findByIdAndUpdate(
       req.user._id,
       { avatar },
-      { new: true, runValisators: true }
+      { new: true, runValidators: true }
     );
     return res.status(HTTP_STATUS_OK).send(updatedUserAvatar);
   } catch (error) {
-    if (error.name === "CastError") {
+    if (error.name === "CastError" || error.name === "ValidationError") {
       return res
         .status(HTTP_STATUS_BAD_REQUEST)
         .send({ message: "Переданы невалидные данные" });
