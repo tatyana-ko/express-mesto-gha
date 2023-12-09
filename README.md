@@ -17,4 +17,4 @@
 
 **Ссылка**
 
-* [Ссылка на сайт](https://github.com/tatyana-ko/express-mesto-gha)
+* [Ссылка](https://github.com/tatyana-ko/express-mesto-gha)
