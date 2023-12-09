@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: {
       value: true,
-      message: 'Поле name обязательно для заполнения'
+      message: 'Поле name обязательно для заполнения',
     },
     minlength: [2, 'Минимальная длина 2 символа'],
     maxlength: [30, 'Максимальная длина 30 символов'],
@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: {
       value: true,
-      message: 'Поле about обязательно для заполнения'
+      message: 'Поле about обязательно для заполнения',
     },
     minlength: [2, 'Минимальная длина 2 символа'],
     maxlength: [30, 'Максимальная длина 30 символов'],
@@ -23,9 +23,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: {
       value: true,
-      message: 'Поле avatar обязательно для заполнения'
+      message: 'Поле avatar обязательно для заполнения',
     },
   },
-}, {versionKey: false});
+}, { versionKey: false });
 
 module.exports = mongoose.model('user', userSchema);

@@ -5,7 +5,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: {
       value: true,
-      message: 'Поле name обязательно для заполнения'
+      message: 'Поле name обязательно для заполнения',
     },
     minlength: [2, 'Минимальная длина 2 символа'],
     maxlength: [30, 'Максимальная длина 30 символов'],
@@ -14,7 +14,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: {
       value: true,
-      message: 'Поле link обязательно для заполнения'
+      message: 'Поле link обязательно для заполнения',
     },
   },
   owner: {
@@ -29,6 +29,6 @@ const cardSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-}, {versionKey: false});
+}, { versionKey: false });
 
 module.exports = mongoose.model('card', cardSchema);
