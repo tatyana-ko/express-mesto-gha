@@ -46,9 +46,19 @@ module.exports.createCard = async (req, res) => {
 module.exports.deleteCard = async (req, res) => {
   try {
     const { cardId } = req.params;
+    const userId = req.user._id;
 
-    const cardDelete = await Card.findByIdAndDelete(cardId);
-    if (!cardDelete) {
+    const card = await Card.findById(cardId);
+    if (!card) {
+      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
+    }
+
+    if (userId !== card.owner.toString()) {
+      return res.status(403).send({ message: 'Невозможно удалить чужую карточку' });
+    }
+
+    const cardToDelete = Card.findByIdAndDelete(cardId);
+    if (!cardToDelete) {
       return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
     }
     return res.status(HTTP_STATUS_OK).send({ message: 'Карточка успешно удалена' });
