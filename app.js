@@ -10,14 +10,13 @@ const { auth } = require('./middlewares/auth');
 const app = express();
 
 app.use(json());
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '6573447c047ef8d23052c750',
-//   };
+app.use((req, res, next) => {
+  req.user = {
+    _id: '6573447c047ef8d23052c750',
+  };
 
-//   next();
-// });
-console.log(auth);
+  next();
+});
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', createUserValidation, createUser);
