@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
       value: true,
       message: 'Поле email обязательно для заполнения',
     },
+    unique: true,
     validator: validator.isEmail,
   },
   password: {

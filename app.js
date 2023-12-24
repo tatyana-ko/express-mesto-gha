@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 
 const { PORT = 3000 } = process.env;
 const { login, createUser } = require('./controllers/users');
+const { loginValidation, createUserValidation } = require('./middlewares/validation');
+const { auth } = require('./middlewares/auth');
 
 const app = express();
 
@@ -16,11 +18,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', loginValidation, login);
+app.post('/signup', createUserValidation, createUser);
 
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
+app.use('/users', auth, require('./routes/users'));
+app.use('/cards', auth, require('./routes/cards'));
 
 app.use((req, res, next) => {
   res.status(404).send({ message: 'Страница не существует' });

@@ -10,6 +10,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const MONGO_DUPLICATE_ERROR_CODE = 11000;
+const SALT_ROUNDS = 10;
 const SECRET_KEY = 'fnnjsnjdfs';
 
 // HTTP_STATUS_OK 200 Запрос успешно выполнен.
@@ -38,7 +40,7 @@ module.exports.login = async (req, res) => {
 
     return res.status(HTTP_STATUS_OK).send({ data: { email: user.email, _id: user._id }, token });
   } catch (error) {
-    if (error.name === 'Error') {
+    if (error.name === 'ValidationError') {
       return res
         .status(HTTP_STATUS_BAD_REQUEST)
         .send({ message: 'Переданы невалидные данные' });
@@ -52,6 +54,10 @@ module.exports.login = async (req, res) => {
       .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
       .send({ message: 'Ошибка на стороне сервера', error: error.name });
   }
+};
+
+module.exports.getCurrentUser = async (req, res) => {
+
 };
 
 module.exports.getAllUsers = async (req, res) => {
@@ -111,7 +117,7 @@ module.exports.createUser = async (req, res) => {
     // eslint-disable-next-line object-curly-newline
     const { name, about, avatar, email, password } = req.body;
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const newUser = await User.create({
       name,
       about,
@@ -132,7 +138,7 @@ module.exports.createUser = async (req, res) => {
         .status(HTTP_STATUS_BAD_REQUEST)
         .send({ message: 'Переданы невалидные данные' });
     }
-    if (error.code === 11000) {
+    if (error.code === MONGO_DUPLICATE_ERROR_CODE) {
       return res
         .status(409)
         .send({ message: 'Пользователь уже существует' });
