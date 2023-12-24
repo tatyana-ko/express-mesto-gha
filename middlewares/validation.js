@@ -32,3 +32,22 @@ module.exports.updateUserAvatarValidation = celebrate({
     avatar: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/,).required(),
   }),
 });
+
+module.exports.getUserByIdValidation = celebrate({
+  body: Joi.object().keys({
+    id: Joi.string().length(24).required().alphanum(),
+  }),
+});
+
+module.exports.createCardValidation = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/,).required(),
+  }),
+});
+
+module.exports.cardIdValidation = celebrate({
+  body: Joi.object().keys({
+    cardId: Joi.string().length(24).required().alphanum(),
+  }),
+});
