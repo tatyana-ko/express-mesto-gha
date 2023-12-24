@@ -1,3 +1,5 @@
+/* eslint-disable no-useless-escape */
+/* eslint-disable comma-dangle */
 /* eslint-disable import/no-extraneous-dependencies */
 const { celebrate, Joi } = require('celebrate');
 
