@@ -57,7 +57,7 @@ module.exports.deleteCard = async (req, res) => {
       return res.status(403).send({ message: 'Невозможно удалить чужую карточку' });
     }
 
-    const cardToDelete = Card.findByIdAndDelete(cardId);
+    const cardToDelete = await Card.findByIdAndDelete(cardId);
     if (!cardToDelete) {
       return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
     }
