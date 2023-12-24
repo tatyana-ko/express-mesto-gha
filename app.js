@@ -17,12 +17,13 @@ app.use(json());
 
 //   next();
 // });
+console.log(auth);
 
 app.post('/signin', loginValidation, login);
 app.post('/signup', createUserValidation, createUser);
 
-app.use('/users', auth, require('./routes/users'));
-app.use('/cards', auth, require('./routes/cards'));
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 
 app.use((req, res, next) => {
   res.status(404).send({ message: 'Страница не существует' });
