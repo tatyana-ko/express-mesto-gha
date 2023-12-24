@@ -14,8 +14,8 @@ const {
 } = require('../middlewares/validation');
 
 router.get('/', getAllUsers);
-router.get('/:id', getUserByIdValidation, getUserByID);
 router.get('/me', getCurrentUser);
+router.get('/:id', getUserByIdValidation, getUserByID);
 router.patch('/me', updateUserInfoValidation, updateUserInformation);
 router.patch('/me/avatar', updateUserAvatarValidation, updateUserAvatar);
 
