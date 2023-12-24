@@ -57,7 +57,25 @@ module.exports.login = async (req, res) => {
 };
 
 module.exports.getCurrentUser = async (req, res) => {
-
+  try {
+    const { _id } = req.user;
+    const currentUser = await User.findById(_id);
+    if (!currentUser) {
+      return res.status(HTTP_STATUS_NOT_FOUND).send({
+        message: 'Сервер не нашел ничего, что соответствует запрошенным данным',
+      });
+    }
+    return res.status(HTTP_STATUS_OK).send(currentUser);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .send({ message: 'Переданы невалидные данные' });
+    }
+    return res
+      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: 'Ошибка на стороне сервера' });
+  }
 };
 
 module.exports.getAllUsers = async (req, res) => {
@@ -92,24 +110,6 @@ module.exports.getUserByID = async (req, res) => {
       .send({ message: 'Ошибка на стороне сервера' });
   }
 };
-
-// module.exports.createUser = async (req, res) => {
-//   try {
-//     const { name, about, avatar } = req.body;
-
-//     const newUser = await User.create({ name, about, avatar });
-//     return res.status(HTTP_STATUS_CREATED).send(newUser);
-//   } catch (error) {
-//     if (error.name === 'ValidationError') {
-//       return res
-//         .status(HTTP_STATUS_BAD_REQUEST)
-//         .send({ message: 'Переданы невалидные данные' });
-//     }
-//     return res
-//       .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-//       .send({ message: 'Ошибка на стороне сервера' });
-//   }
-// };
 
 // eslint-disable-next-line consistent-return
 module.exports.createUser = async (req, res) => {
