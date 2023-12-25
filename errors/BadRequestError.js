@@ -1,4 +1,4 @@
-// 400 Не удалось обработать запрос сервером из-за недопустимого синтаксиса
+// 400 Не удалось обработать запрос сервером ValidationError, CastError
 
 class BadRequestError extends Error {
   constructor(message) {

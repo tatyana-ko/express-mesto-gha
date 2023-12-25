@@ -2,15 +2,15 @@
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } = require('http2').constants;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
+const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
@@ -23,13 +23,13 @@ module.exports.login = async (req, res, next) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
-      return res.status(401).send({ message: 'Неверный email или password' });
+      return next(new UnauthorizedError('Неверный email или password'));
     }
 
     const matched = await bcrypt.compare(password, user.password);
 
     if (!matched) {
-      return res.status(401).send({ message: 'Неверный email или password' });
+      return next(new UnauthorizedError('Неверный email или password'));
     }
 
     const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '10d' });
@@ -40,73 +40,55 @@ module.exports.login = async (req, res, next) => {
       return next(new BadRequestError('Переданы невалидные данные'));
     }
     if (error.message === 'NotAuthenticate') {
-      return res
-        .status(401)
-        .send({ message: 'Неверный email или password' });
+      return next(new UnauthorizedError('Неверный email или password'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера', error: error.name });
+    return next(error);
   }
 };
 
-module.exports.getCurrentUser = async (req, res) => {
+module.exports.getCurrentUser = async (req, res, next) => {
   try {
     const { _id } = req.user;
     const currentUser = await User.findById(_id);
     if (!currentUser) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({
-        message: 'Сервер не нашел ничего, что соответствует запрошенным данным',
-      });
+      return next(new NotFoundError('Сервер не нашел ничего, что соответствует запрошенным данным'));
     }
     return res.status(HTTP_STATUS_OK).send(currentUser);
   } catch (error) {
     if (error.name === 'CastError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.getAllUsers = async (req, res) => {
+module.exports.getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     return res.status(HTTP_STATUS_OK).send(users);
   } catch (error) {
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.getUserByID = async (req, res) => {
+module.exports.getUserByID = async (req, res, next) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id);
     if (!user) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({
-        message: 'Сервер не нашел ничего, что соответствует запрошенным данным',
-      });
+      return next(new NotFoundError('Сервер не нашел ничего, что соответствует запрошенным данным'));
     }
     return res.status(HTTP_STATUS_OK).send(user);
   } catch (error) {
     if (error.name === 'CastError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
 // eslint-disable-next-line consistent-return
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   try {
     // eslint-disable-next-line object-curly-newline
     const { name, about, avatar, email, password } = req.body;
@@ -128,22 +110,16 @@ module.exports.createUser = async (req, res) => {
     });
   } catch (error) {
     if (error.name === 'ValidationError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
     if (error.code === MONGO_DUPLICATE_ERROR_CODE) {
-      return res
-        .status(409)
-        .send({ message: 'Пользователь уже существует' });
+      return next(new ConflictError('Пользователь уже существует'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера', error: error.name });
+    return next(error);
   }
 };
 
-module.exports.updateUserInformation = async (req, res) => {
+module.exports.updateUserInformation = async (req, res, next) => {
   try {
     const { name, about } = req.body;
 
@@ -155,17 +131,13 @@ module.exports.updateUserInformation = async (req, res) => {
     return res.status(HTTP_STATUS_OK).send(updatedUserInfo);
   } catch (error) {
     if (error.name === 'CastError' || error.name === 'ValidationError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.updateUserAvatar = async (req, res) => {
+module.exports.updateUserAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
 
@@ -177,12 +149,8 @@ module.exports.updateUserAvatar = async (req, res) => {
     return res.status(HTTP_STATUS_OK).send(updatedUserAvatar);
   } catch (error) {
     if (error.name === 'CastError' || error.name === 'ValidationError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };

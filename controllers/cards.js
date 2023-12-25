@@ -1,11 +1,12 @@
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } = require('http2').constants;
 const Card = require('../models/card');
+
+const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
 
 // HTTP_STATUS_OK 200 Запрос успешно выполнен.
 // HTTP_STATUS_CREATED 201 Запрос выполнен и привел к созданию нового ресурса.
@@ -13,18 +14,16 @@ const Card = require('../models/card');
 // HTTP_STATUS_NOT_FOUND 404 Сервер не нашел ничего, что соответствует запрошенным URI.
 // HTTP_STATUS_INTERNAL_SERVER_ERROR 500 Internal Server Error.
 
-module.exports.getAllCards = async (req, res) => {
+module.exports.getAllCards = async (req, res, next) => {
   try {
     const allCards = await Card.find({});
     return res.status(HTTP_STATUS_OK).send(allCards);
   } catch (error) {
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.createCard = async (req, res) => {
+module.exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
     const owner = req.user._id;
@@ -33,48 +32,40 @@ module.exports.createCard = async (req, res) => {
     return res.status(HTTP_STATUS_CREATED).send(newCard);
   } catch (error) {
     if (error.name === 'ValidationError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
   try {
     const { cardId } = req.params;
     const userId = req.user._id;
 
     const card = await Card.findById(cardId);
     if (!card) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
+      return next(new NotFoundError('Карточка не найдена'));
     }
 
     if (userId !== card.owner.toString()) {
-      return res.status(403).send({ message: 'Невозможно удалить чужую карточку' });
+      return next(new ForbiddenError('Невозможно удалить чужую карточку'));
     }
 
     const cardToDelete = await Card.findByIdAndDelete(cardId);
     if (!cardToDelete) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
+      return next(new NotFoundError('Карточка не найдена'));
     }
     return res.status(HTTP_STATUS_OK).send({ message: 'Карточка успешно удалена' });
   } catch (error) {
     if (error.name === 'CastError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.putCardLike = async (req, res) => {
+module.exports.putCardLike = async (req, res, next) => {
   try {
     const cardLike = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -82,22 +73,18 @@ module.exports.putCardLike = async (req, res) => {
       { new: true },
     );
     if (!cardLike) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
+      return next(new NotFoundError('Карточка не найдена'));
     }
     return res.status(HTTP_STATUS_OK).send({ message: 'Лайк добавлен' });
   } catch (error) {
     if (error.name === 'CastError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
 
-module.exports.deleteCardLike = async (req, res) => {
+module.exports.deleteCardLike = async (req, res, next) => {
   try {
     const cardDislike = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -105,17 +92,13 @@ module.exports.deleteCardLike = async (req, res) => {
       { new: true },
     );
     if (!cardDislike) {
-      return res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточка не найдена' });
+      return next(new NotFoundError('Карточка не найдена'));
     }
     return res.status(HTTP_STATUS_OK).send({ message: 'Лайк удалён' });
   } catch (error) {
     if (error.name === 'CastError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
-    return res
-      .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Ошибка на стороне сервера' });
+    return next(error);
   }
 };
