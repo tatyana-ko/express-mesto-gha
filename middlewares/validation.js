@@ -7,7 +7,7 @@ module.exports.createUserValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/,),
+    avatar: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -29,7 +29,7 @@ module.exports.updateUserInfoValidation = celebrate({
 
 module.exports.updateUserAvatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/,).required(),
+    avatar: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/).required(),
   }),
 });
 
@@ -42,7 +42,7 @@ module.exports.getUserByIdValidation = celebrate({
 module.exports.createCardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/,).required(),
+    link: Joi.string().regex(/^(https?:\/\/)(www\.)?([a-zA-Z0-9-._~:\/?#[\]@!$&'()*+,;=]+#?)$/).required(),
   }),
 });
 
