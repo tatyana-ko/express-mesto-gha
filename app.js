@@ -9,6 +9,7 @@ const { login, createUser } = require('./controllers/users');
 const { loginValidation, createUserValidation } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
 const handleError = require('./middlewares/handleError');
+const NotFoundError = require('./errors/NotFoundError');
 
 const app = express();
 
@@ -20,11 +21,7 @@ app.post('/signup', createUserValidation, createUser);
 app.use('/users', auth, require('./routes/users'));
 app.use('/cards', auth, require('./routes/cards'));
 
-app.use((req, res, next) => {
-  res.status(404).send({ message: 'Страница не существует' });
-
-  next();
-});
+app.use((req, res, next) => next(new NotFoundError('Страница не существует')));
 
 app.use(errors());
 app.use(handleError);
