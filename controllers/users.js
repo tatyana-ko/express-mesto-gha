@@ -10,17 +10,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const BadRequestError = require('../errors/BadRequestError');
+
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
 const SECRET_KEY = 'fnnjsnjdfs';
 
-// HTTP_STATUS_OK 200 Запрос успешно выполнен.
-// HTTP_STATUS_CREATED 201 Запрос выполнен и привел к созданию нового ресурса.
-// HTTP_STATUS_BAD_REQUEST 400 Не удалось обработать запрос сервером из-за недопустимого синтаксиса.
-// HTTP_STATUS_NOT_FOUND 404 Сервер не нашел ничего, что соответствует запрошенным URI.
-// HTTP_STATUS_INTERNAL_SERVER_ERROR 500 Internal Server Error.
-
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -41,9 +37,7 @@ module.exports.login = async (req, res) => {
     return res.status(HTTP_STATUS_OK).send({ data: { email: user.email, _id: user._id }, token });
   } catch (error) {
     if (error.name === 'ValidationError') {
-      return res
-        .status(HTTP_STATUS_BAD_REQUEST)
-        .send({ message: 'Переданы невалидные данные' });
+      return next(new BadRequestError('Переданы невалидные данные'));
     }
     if (error.message === 'NotAuthenticate') {
       return res
