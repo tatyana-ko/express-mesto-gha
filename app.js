@@ -7,6 +7,7 @@ const { PORT = 3000 } = process.env;
 const { login, createUser } = require('./controllers/users');
 const { loginValidation, createUserValidation } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
+const handleError = require('./middlewares/handleError');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 });
 
 app.use(errors());
+app.use(handleError);
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
