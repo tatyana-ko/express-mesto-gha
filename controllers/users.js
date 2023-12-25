@@ -1,3 +1,4 @@
+/* eslint-disable object-curly-newline */
 /* eslint-disable consistent-return */
 const {
   HTTP_STATUS_OK,
@@ -14,7 +15,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
-const SECRET_KEY = 'fnnjsnjdfs';
+const { SECRET_KEY } = process.env;
 
 module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -87,10 +88,8 @@ module.exports.getUserByID = async (req, res, next) => {
   }
 };
 
-// eslint-disable-next-line consistent-return
 module.exports.createUser = async (req, res, next) => {
   try {
-    // eslint-disable-next-line object-curly-newline
     const { name, about, avatar, email, password } = req.body;
 
     const hashPassword = await bcrypt.hash(password, SALT_ROUNDS);

@@ -1,9 +1,10 @@
 const express = require('express');
 const { json } = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, MONGO_URL } = process.env;
 const { login, createUser } = require('./controllers/users');
 const { loginValidation, createUserValidation } = require('./middlewares/validation');
 const auth = require('./middlewares/auth');
@@ -28,6 +29,6 @@ app.use((req, res, next) => {
 app.use(errors());
 app.use(handleError);
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(MONGO_URL);
 
 app.listen(PORT);

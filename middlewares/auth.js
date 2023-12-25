@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = 'fnnjsnjdfs';
+const { SECRET_KEY } = process.env;
 
 module.exports = (req, res, next) => {
   let payload;
